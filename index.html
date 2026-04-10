@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OUTI - 户外人格测试</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080c08;--card:#111a11;--card2:#182418;--accent:#4ade80;--accent2:#22c55e;--accent-dim:#166534;--text:#e2f0e2;--text-dim:#7a9a7a;--border:#1e331e;--warn:#f59e0b;--danger:#ef4444}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.bg-layer{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 20% 80%,rgba(34,197,94,.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(74,222,128,.04) 0%,transparent 50%)}
+.mountain-bg{position:fixed;bottom:0;left:0;width:100%;height:180px;z-index:0;opacity:.12}
+.container{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:20px;min-height:100vh}
+
+.splash{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;animation:fadeIn .8s ease}
+.logo{font-size:68px;font-weight:900;letter-spacing:-3px;background:linear-gradient(135deg,#4ade80,#22c55e,#16a34a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative}
+.logo::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:50px;height:3px;background:var(--accent);border-radius:2px}
+.subtitle{font-size:13px;color:var(--text-dim);margin-top:24px;letter-spacing:3px}
+.splash-badge{display:inline-block;margin-top:16px;padding:5px 14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.15);border-radius:20px;font-size:12px;color:var(--accent)}
+.splash-desc{margin-top:28px;font-size:14px;color:var(--text-dim);line-height:1.9;max-width:300px}
+.start-btn{margin-top:36px;padding:15px 44px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:50px;font-size:17px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:2px}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(34,197,94,.3)}
+.splash-disclaimer{margin-top:20px;font-size:11px;color:rgba(122,154,122,.4)}
+
+.quiz{display:none;animation:fadeIn .5s ease}
+.progress-bar{width:100%;height:3px;background:var(--border);border-radius:2px;margin-bottom:28px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;transition:width .5s ease}
+.q-counter{font-size:11px;color:var(--text-dim);margin-bottom:6px;letter-spacing:2px}
+.q-text{font-size:18px;font-weight:700;line-height:1.7;margin-bottom:28px;min-height:60px}
+.options{display:flex;flex-direction:column;gap:10px}
+.option-btn{padding:16px 18px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);font-size:14px;line-height:1.6;cursor:pointer;transition:all .3s;text-align:left;position:relative;overflow:hidden}
+.option-btn::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);opacity:0;transition:opacity .3s}
+.option-btn:hover{background:var(--card2);border-color:var(--accent-dim);transform:translateX(3px)}
+.option-btn:hover::before{opacity:1}
+.option-btn.selected{background:rgba(74,222,128,.08);border-color:var(--accent)}
+.option-btn.selected::before{opacity:1}
+
+.result{display:none;animation:fadeIn .8s ease;padding-bottom:50px}
+.result-header{text-align:center;padding:24px 0}
+.result-tag{display:inline-block;padding:5px 14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.15);border-radius:20px;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:14px}
+.result-type{font-size:44px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#4ade80,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.result-name{font-size:20px;font-weight:700;margin-bottom:2px}
+.result-alias{font-size:13px;color:var(--text-dim);font-style:italic}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin:16px 0}
+.result-desc{font-size:14px;line-height:1.9;color:var(--text);margin-bottom:16px}
+.result-quote{font-size:15px;font-weight:700;color:var(--accent);text-align:center;padding:14px;background:rgba(74,222,128,.04);border-radius:12px;border-left:3px solid var(--accent);margin-bottom:16px;line-height:1.6}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.stat-item{background:rgba(74,222,128,.04);border-radius:12px;padding:14px;text-align:center}
+.stat-value{font-size:20px;font-weight:900;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--text-dim);margin-top:3px;letter-spacing:1px}
+.section-title{font-size:13px;font-weight:700;color:var(--text-dim);letter-spacing:2px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.trait-list{list-style:none;margin-bottom:16px}
+.trait-list li{padding:8px 0;border-bottom:1px solid rgba(30,51,30,.5);font-size:13px;line-height:1.6;color:var(--text)}
+.trait-list li:last-child{border-bottom:none}
+.warning-box{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:12px;padding:14px;margin:14px 0;font-size:12px;color:#fbbf24;line-height:1.7}
+.match-item{display:flex;align-items:center;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.match-type{font-size:18px;font-weight:900;color:var(--accent);margin-right:10px;min-width:50px}
+.match-info{flex:1}
+.match-name{font-size:13px;font-weight:700}
+.match-desc{font-size:11px;color:var(--text-dim);margin-top:2px}
+.share-area{text-align:center;margin-top:24px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:18px}
+.share-title{font-size:13px;color:var(--text-dim);margin-bottom:14px;letter-spacing:1px}
+.share-btn{display:inline-block;padding:11px 28px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;margin:0 4px}
+.share-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(34,197,94,.3)}
+.retry-btn{display:inline-block;padding:11px 28px;background:transparent;color:var(--text-dim);border:1px solid var(--border);border-radius:50px;font-size:14px;cursor:pointer;transition:all .3s;margin:0 4px}
+.retry-btn:hover{border-color:var(--text-dim);color:var(--text)}
+.atlas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.atlas-item{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px 6px 8px;text-align:center;transition:all .3s;cursor:default}
+.atlas-item:hover{background:rgba(255,255,255,.05);transform:translateY(-2px)}
+.atlas-active{background:rgba(74,222,128,.08)!important;border-color:rgba(74,222,128,.25)!important;box-shadow:0 0 12px rgba(74,222,128,.1)}
+.atlas-avatar{width:48px;height:56px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px}
+.atlas-avatar img{width:100%;height:100%;object-fit:cover}
+.atlas-code{font-size:12px;font-weight:900;color:var(--c,#7a9a7a);letter-spacing:1px}
+.atlas-active .atlas-code{color:#4ade80}
+.atlas-name{font-size:9px;color:var(--text-dim);margin-top:1px;letter-spacing:.5px}
+.atlas-active .atlas-name{color:var(--accent)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .5s ease forwards}
+::-webkit-scrollbar{width:0}
+@media(max-width:360px){.logo{font-size:52px}.result-type{font-size:34px}.q-text{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<svg class="mountain-bg" viewBox="0 0 1440 180" preserveAspectRatio="none">
+<path d="M0,180 L0,110 Q120,30 240,90 Q360,15 480,75 Q560,25 640,80 Q720,5 800,65 Q900,20 1000,78 Q1080,10 1160,68 Q1260,30 1360,88 L1440,55 L1440,180Z" fill="rgba(74,222,128,.12)"/>
+<path d="M0,180 L0,140 Q180,70 360,120 Q480,60 600,110 Q720,50 840,100 Q960,45 1080,90 Q1200,55 1320,105 L1440,80 L1440,180Z" fill="rgba(34,197,94,.08)"/>
+</svg>
+
+<div class="container">
+<div class="splash" id="splash">
+<div class="logo">OUTI</div>
+<div class="subtitle">Outdoor Unhealthy Test Index</div>
+<div class="splash-badge">MBTI已过时 OUTI来了</div>
+<div class="splash-desc">
+零心理学依据，零登山指导意义<br>
+纯粹测测你在山野里的精神状态<br><br>
+16道题，2分钟，揭晓你的户外人格<br>
+16种人格，总有一款扎你心
+</div>
+<button class="start-btn" onclick="startQuiz()">进 山</button>
+<div class="splash-disclaimer">本测试纯属娱乐，如有雷同说明你也病得不轻</div>
+</div>
+
+<div class="quiz" id="quiz">
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="q-counter" id="qCounter">01 / 16</div>
+<div class="q-text" id="qText"></div>
+<div class="options" id="options"></div>
+</div>
+
+<div class="result" id="result"></div>
+</div>
+
+<script>
+// ===== 16个户外人格形象图片 =====
+const avatarPath='outi形象图片/';
+const avatars={
+TRK:avatarPath+'1. TRK.png',
+NRD:avatarPath+'2. NRD.png',
+PHT:avatarPath+'3. PHT .png',
+SNS:avatarPath+'4. SNS.png',
+GVH:avatarPath+'5. GVH.png',
+PKR:avatarPath+'6. PKR.png',
+DRK:avatarPath+'7. DRK .png',
+BSS:avatarPath+'8. BSS.png',
+WLF:avatarPath+'9. WLF.png',
+SLK:avatarPath+'10. SLK.png',
+HYP:avatarPath+'11. HYP.png',
+JNX:avatarPath+'12. JNX.png',
+RLB:avatarPath+'13. RLB.png',
+CHR:avatarPath+'14. CHR.png',
+ANG:avatarPath+'15. ANG.png',
+ZEN:avatarPath+'16. ZEN.png'
+};
+
+;
+
+// ===== 16种户外人格定义 =====
+const types={
+TRK:{code:"TRK",name:"山瘾者",alias:"Trackhead / 人形步数机器",icon:"🏔️",color:"#4ade80",
+desc:"你上瘾了。不是对风景，不是对社交，是对'走'这件事本身。周末没有'休息'这个选项，只有'去哪座山'。朋友约饭你说没空，朋友约山你秒回。你不是在享受户外，你是在完成一种身体必须执行的程序。爬山对你来说不是逃离日常，而是回归本位——你的出厂设置里就没有'宅家'这个选项。",
+quote:"山在那儿，我就得去签收",
+stats:[{l:"周末出勤率",v:"97%"},{l:"装备投入",v:"破产级"},{l:"社交圈",v:"全在山里"},{l:"膝盖状态",v:"已写辞职信"}],
+traits:["收藏的路线比去过的多3倍，但正在逐个消灭","跟人说'这周末休息'时，手指在偷偷打开两步路","被问'为什么这么爱爬山'时，自己也答不上来","体检报告比路线攻略短，膝盖核磁比风景照多","你的年假只用在一个地方——山里"],
+warning:"你的膝盖正在写辞职信，而且已经投了三份。学会休息日，你的身体不是永动机。",
+goodMatch:{code:"NRD",name:"野路子",desc:"帮你规划路线，救你于迷途"},
+badMatch:{code:"BSS",name:"戏精",desc:"TA哭的时候你已经走没影了"}
+},
+NRD:{code:"NRD",name:"野路子",alias:"Nerd / 人形等高线",icon:"🧭",color:"#60a5fa",
+desc:"你是户外圈的技术宅。别人看山是山，你看山是坡度、海拔、地表覆盖类型和潜在风险点。你的背包像个移动指挥站，你的大脑装着方圆50公里的地形数据。你不是不享受风景，只是更享受掌控感。队友迷路找你，天气变脸找你，装备出问题还找你——你是队伍的定海神针，但你自己知道，你只是害怕失控。",
+quote:"我看过路线了，跟我走就行",
+stats:[{l:"路线研究时长",v:"3x行走时长"},{l:"离线地图",v:"占手机70%"},{l:"靠谱指数",v:"SSS"},{l:"随性指数",v:"极低"}],
+traits:["出发前路线规划PPT比上班汇报还认真","手机5个地图+4个天气+3个轨迹APP","能凭等高线密度判断坡度，精度±3°","队友口头禅：'XX，这条路对吗？'","怕的不是山，是计划外的一切"],
+warning:"山野从不按计划走。偶尔关掉GPS，相信直觉，迷路也是风景。",
+goodMatch:{code:"GVH",name:"硬撑侠",desc:"你规划，TA硬撑，完美互补"},
+badMatch:{code:"PHT",name:"出片狂",desc:"TA让你等拍照等到崩溃"}
+},
+PHT:{code:"PHT",name:"出片狂",alias:"Photoholic / 朋友圈登山运动员",icon:"📸",color:"#f472b6",
+desc:"你的登山速度取决于光线变化，配速单位是'每公里几张图'。冲锋衣要搭配色，登山杖要上镜，头盔影响发型可以不戴——但请戴。你不是在爬山，你是在制作一条视觉叙事。照片经过5层滤镜，文案经过3轮推敲，但登山杖用法还不太熟练。九宫格一出，谁还在乎你中途喘成什么样？",
+quote:"不出片，等于没去过",
+stats:[{l:"出片率",v:"99%"},{l:"登顶率",v:"看光线"},{l:"修图时长",v:"比爬山久"},{l:"安全意识",v:"滤镜级"}],
+traits:["出发前搭配冲锋衣颜色比搭配路线还认真","背包里最重的不是水，是相机和三脚架","登顶第一反应不是'我做到了'而是'光线行不行'","队友等你的频率比你等光线还高","运动相机+无人机+手机三机位起步"],
+warning:"悬崖边找角度的事少干。风景再好，命更重要，别为一张图赌命。",
+goodMatch:{code:"SNS",name:"山系社交家",desc:"互相当模特，互相点赞"},
+badMatch:{code:"TRK",name:"山瘾者",desc:"TA走没影了你还在找机位"}
+},
+SNS:{code:"SNS",name:"山系社交家",alias:"Socialite / 装备圈人脉王",icon:"🤝",color:"#fbbf24",
+desc:"你爬山的社交属性远大于运动属性。加入的户外群比爬过的山多，认识的领队比走过的路线多。你不是在徒步，你是在线下社交——山只是背景板。你擅长活跃气氛，是队伍里的开心果，但也可能是最晚出发的那个，因为等人的时候你在群里发了30条消息。",
+quote:"重在参与，更重在发群聊",
+stats:[{l:"户外群",v:"38个"},{l:"认识的大佬",v:"数不过来"},{l:"独立导航",v:"基本为零"},{l:"气氛贡献",v:"MVP"}],
+traits:["出发前在群里@了20个人，到了3个","迷路第一反应不是看地图，是发群问","装备全靠借和二手，但每件都有故事","爬山途中一直在聊天，下撤还在聊","朋友圈户外动态频率>实际出门频率"],
+warning:"依赖别人的路线和安全意识不是长久之计。学点基础导航和急救，关键时刻自救比求助靠谱。",
+goodMatch:{code:"HYP",name:"气氛组",desc:"社交+气氛，队伍双引擎"},
+badMatch:{code:"WLF",name:"独狼",desc:"TA嫌你吵，你嫌TA冷"}
+},
+GVH:{code:"GVH",name:"硬撑侠",alias:"Grit / 嘴硬腿更硬",icon:"🔥",color:"#f97316",
+desc:"你的体能和经验可能不够，但你的嘴够硬。每次出发都说'随便走走'，每次都是最后一名但绝不掉队。膝盖疼但不说，喘不上气但不停，迷路了但装淡定。你不是在享受户外，你是在和自己的极限较劲。脚底的水泡是你的勋章，晒伤的鼻子是荣誉旗帜。你花钱买罪受，然后下次还来。",
+quote:"还行还行……（喘）",
+stats:[{l:"嘴硬指数",v:"MAX"},{l:"完赛率",v:"100%"},{l:"完赛代价",v:"3天卧床"},{l:"下次还来",v:"100%"}],
+traits:["每次都说'这回轻松'，每次都是意外","膝盖绑带比冲锋衣还显眼","山顶最狼狈的那个，但笑着拍照的也是","下山路比上山慢3倍，但不接受搀扶","朋友圈永远是'又活下来了'配个狗头"],
+warning:"硬撑不是勇气，是信息不足。学会评估自身体能和路线难度，该撤就撤，山永远在。",
+goodMatch:{code:"TRK",name:"山瘾者",desc:"TA带节奏，你跟到底"},
+badMatch:{code:"JNX",name:"扫把星",desc:"你硬撑+TA倒霉=双重灾难"}
+},
+PKR:{code:"PKR",name:"打卡收割机",alias:"Peaker / 山顶集邮者",icon:"📍",color:"#a78bfa",
+desc:"你登山的目的极其明确——登顶，打卡，下一座。风景？路上看两眼。拍照？登顶拍一张够了。社交？别挡我赶路。你是户外圈的效率狂魔，你的登山记录像Excel表格，你的目标清单像上市公司KPI。你不是在享受过程，你是在完成指标。某天你会把它们做成一张地图挂在墙上——那时你终于承认，原来自己也热爱这些山，只是表达方式比较变态。",
+quote:"第47座，还有312座",
+stats:[{l:"登顶数",v:"遥遥领先"},{l:"途中拍照",v:"<5张"},{l:"目标完成率",v:"季度OKR"},{l:"享受指数",v:"待提升"}],
+traits:["到了山顶待不到5分钟就开始下撤","Excel记录每座山的日期海拔耗时","别人在营地看星空，你在研究明天路线","爬山速度稳定如配速跑，不接受'休息一下'","朋友圈不发风景，只发登顶定位和海拔数据"],
+warning:"山不是KPI，你也不是打卡机。下次在山顶多待10分钟，什么都不做，看看云。",
+goodMatch:{code:"NRD",name:"野路子",desc:"规划+执行，登山CP"},
+badMatch:{code:"PHT",name:"出片狂",desc:"TA在拍照时你已经下撤了"}
+},
+DRK:{code:"DRK",name:"装备党",alias:"Gearhead / 参数比我命还重要",icon:"🛠️",color:"#06b6d4",
+desc:"你是户外圈的参数狂魔。买装备前看测评30篇，买装备后写测评3篇。你比任何人都清楚GORE-TEX的三层结构、碳纤维杖的挠曲模量、某某包的背负系统迭代了几代。你的装备总价值超过你一年的户外预算。但说实话，你装备的使用频率远低于研究频率。你不是在买功能，你是在买确定性——至少装备的参数不会骗你。",
+quote:"参数到位了，就差出门了",
+stats:[{l:"装备总价",v:"可以买房首付"},{l:"使用率",v:"30%"},{l:"测评产出",v:"比登山记录多"},{l:"实战经验",v:"对得起装备吗"}],
+traits:["看别人装备一眼就能估出价格和型号","买完装备第一时间不是用，是拍照发圈","装备保养比个人保养认真10倍","衣柜里冲锋衣比正装多","研究了半年睡袋温标，露营只去了两次"],
+warning:"装备再好也是工具，不是身份证。你的户外不需要用装备来证明什么，走出去才算数。",
+goodMatch:{code:"NRD",name:"野路子",desc:"参数控+路线控，技术双人组"},
+badMatch:{code:"SLK",name:"摆烂王",desc:"你精心选的装备在TA眼里都是'差不多'"}
+},
+BSS:{code:"BSS",name:"戏精",alias:"Drama / 户外奥斯卡影帝影后",icon:"🎭",color:"#ec4899",
+desc:"你是山野里的流量担当。崴脚能哭出琼瑶剧效果，帐篷歪了能演出世界末日。你享受被关注的感觉，痛苦是你吸引同情的工具。你分不清'真的难受'和'表演难受'，演着演着自己都信了。队友一开始会关心你，后来只想给你颁个奥斯卡然后把你送走。但不可否认，有你在的队伍从来不无聊。",
+quote:"我好像不行了……（其实还能走三公里）",
+stats:[{l:"戏精指数",v:"奥斯卡级"},{l:"真实痛苦",v:"存疑"},{l:"队友耐心",v:"已耗尽"},{l:"队伍娱乐值",v:"拉满"}],
+traits:["膝盖疼要坐下，坐下就开始讲故事","每次都说'我不行了'，每次都第一个到顶","被蚊子咬一口，讲述得像被野生动物袭击","帐篷搭不好不是技术问题，是'风太大了'","哭完擦干眼泪，立刻问'有人拍了吗'"],
+warning:"适度表演是乐趣，过度表演消耗队友信任。真受伤时没人信你就尴尬了。",
+goodMatch:{code:"HYP",name:"气氛组",desc:"一个演一个捧，黄金搭档"},
+badMatch:{code:"WLF",name:"独狼",desc:"TA对你的戏零反应，让你很受伤"}
+},
+WLF:{code:"WLF",name:"独狼",alias:"Lone Wolf / 报了团但假装没报",icon:"🐺",color:"#6366f1",
+desc:"你宣称'享受孤独'，其实是不懂合作。你讨厌等人的麻烦，也讨厌被等的压力，所以一个人冲在最前或落在最后。你不拍合照、不参与夜聊、不分享食物。你觉得这叫酷，别人觉得你怪。户外确实可以独行，但既然报了团，就别装孤胆英雄。你缺的不是能力，是一点点与人连接的意愿。",
+quote:"你们先走，我一会儿跟上",
+stats:[{l:"社交参与度",v:"5%"},{l:"行进速度",v:"全队最快or最慢"},{l:"合照出现率",v:"0%"},{l:"真实孤独感",v:"不肯说"}],
+traits:["永远走在队伍最前面，偶尔消失在转弯处","合照时你在旁边系鞋带","不分享食物但也不蹭别人的","帐篷扎在最远的角落","说不孤独，但每次活动还是报了团"],
+warning:"既然来了，就试着跟人走一段。独行的风景很好，但回头看到队友在等你的感觉也不差。",
+goodMatch:{code:"ANG",name:"小天使",desc:"不逼你社交，但默默关心你"},
+badMatch:{code:"HYP",name:"气氛组",desc:"TA的热情对你来说是噪音"}
+},
+SLK:{code:"SLK",name:"摆烂王",alias:"Slacker / 佛系但真的只是懒",icon:"🦥",color:"#84cc16",
+desc:"你的户外哲学是'无所谓，都可以，随便啦'。路线不挑、时间不赶、装备不查。下雨了'哦'，迷路了'行吧'，队友吵架'算了'。你以为这是佛系，其实是放弃责任。你不做决定因为决定错了要背锅，你不提意见因为意见会被反驳。你是团队里的空气——没有你更轻松，有你也没什么负担。",
+quote:"都行，随便，都可以",
+stats:[{l:"决策参与",v:"0%"},{l:"抱怨频率",v:"0%"},{l:"存在感",v:"薛定谔级"},{l:"意外率",v:"因为不准备所以很高"}],
+traits:["出发前唯一问的是'几点集合'然后记错时间","背包里永远缺一样关键东西","走哪算哪，迷路了也不急","从不主动选路线，但别人选的也不反对","活动结束后群里第一个说'下次再约'但从不报名"],
+warning:"佛系和摆烂的区别是：佛系是看清了选择不在意，摆烂是根本没看就放弃了。下次试着做个决定。",
+goodMatch:{code:"RLB",name:"靠谱王",desc:"TA替你操心，你替TA减压"},
+badMatch:{code:"NRD",name:"野路子",desc:"TA的计划在你面前毫无意义"}
+},
+HYP:{code:"HYP",name:"气氛组",alias:"Hype Man / 移动人形音响",icon:"🎵",color:"#f43f5e",
+desc:"你是团队的移动音响，有你的地方就有噪音。你唱歌、讲段子、起哄、喊口号，再累的路你都能整出综艺效果。你存在的价值是防止大家陷入绝望，但有时候你也会翻车——别人累得不想说话，你还在强行活跃气氛，那就从开心果变成了烦人精。掌握分寸是你的终身课题。",
+quote:"冲冲冲！不到长城非好汉！",
+stats:[{l:"音量",v:"全队最大"},{l:"段子库存",v:"无限"},{l:"翻车率",v:"30%"},{l:"实际贡献",v:"情绪价值拉满"}],
+traits:["上山喊口号比走路还卖力","讲鬼故事吓到队友但自己先笑了","别人休息时你在讲上次'差点出事'的经历","下山路上一路唱歌，五音不全但气势十足","队伍气氛冷场时你会讲个冷笑话，更冷了"],
+warning:"懂得读空气。队友沉默时也许只需要安静的陪伴，不是每个低谷都需要你填满。",
+goodMatch:{code:"BSS",name:"戏精",desc:"一个演一个捧，综艺效果翻倍"},
+badMatch:{code:"WLF",name:"独狼",desc:"TA觉得你是移动噪音源"}
+},
+JNX:{code:"JNX",name:"扫把星",alias:"Jinx / 行走的 Murphy's Law",icon:"🌧️",color:"#8b5cf6",
+desc:"你身上有一种神秘的负面磁场。你报名那天开始下雨，你带的路必然走错，你摸过的装备大概率会坏。你不是故意的，但结果都一样——你到哪，哪出问题。队友嘴上说'没事没事'，心里已经把你拉进黑名单。你已经习惯了，甚至开始自嘲，但心里多少有点委屈——明明你也很想顺利一次啊。",
+quote:"不是我克山，是山克我",
+stats:[{l:"活动遇雨率",v:"90%"},{l:"装备故障率",v:"比平均值高5倍"},{l:"迷路体质",v:"已确认"},{l:"队友嫌弃度",v:"表面0实际80"}],
+traits:["你报名的那期活动，天气预报从来不准","你的装备总是出些奇葩问题——水壶漏、鞋底开胶、头灯没电","走哪条路哪条路塌方，虽然只是小塌","你已经学会自带雨衣+备用雨衣+给队友带雨衣","每次出发前群里有人说'你来了我就放心了（反义）'"],
+warning:"别自我实现预言。你的'倒霉'有一半是自己暗示出来的，下次出门对自己说'今天一定顺'试试。",
+goodMatch:{code:"ZEN",name:"佛系王",desc:"TA不在乎出什么事，什么都能接受"},
+badMatch:{code:"GVH",name:"硬撑侠",desc:"你倒霉+TA硬撑=双重灾难现场"}
+},
+RLB:{code:"RLB",name:"靠谱王",alias:"Reliable / 全队最稳的人",icon:"🛡️",color:"#14b8a6",
+desc:"你是户外圈最受欢迎的物种。你从不迟到、从不抱怨、从不掉链子。你的背包里永远有多余的水、急救包、充电宝，好像提前预判了所有人的需求。领队看到你报名，心里先踏实一半。你不是最亮眼的，但你是最让人安心的。你的存在感不高，但缺了你全队都会慌。",
+quote:"没事，我带了",
+stats:[{l:"靠谱指数",v:"SSS+"},{l:"背包余量",v:"永远有备份"},{l:"存在感",v:"缺了才知道"},{l:"被当工具人率",v:"极高"}],
+traits:["背包永远比预计多5公斤——因为帮别人带的东西","出发前会默默确认每个人的装备状况","从不争当领队，但关键时刻自然成为决策者","你的急救包用过无数次，但从来不是给自己用的","活动结束后最后一个走，因为要检查营地有没有遗留垃圾"],
+warning:"靠谱不等于要当所有人的保姆。学会拒绝，你的背包不需要装所有人的安全感。",
+goodMatch:{code:"ANG",name:"小天使",desc:"你们是户外圈的温暖双人组"},
+badMatch:{code:"SLK",name:"摆烂王",desc:"你的靠谱被TA无限白嫖"}
+},
+CHR:{code:"CHR",name:"开心果",alias:"Cheerleader / 情绪发动机",icon:"🌻",color:"#eab308",
+desc:"你是团队的情绪发动机。再烂的路、再差的天气、再累的身体，你都能找到笑点。你不是不累，你是选择用幽默对抗痛苦。你的乐观不是无知，而是一种责任——你知道气氛崩了队伍就散了。你会累但不说，会烦但不演。你是那个让大家忘记疲惫的人，但很少有人问你是否也需要人让你笑一笑。",
+quote:"累了就想想下山的烧烤！",
+stats:[{l:"乐观指数",v:"爆表"},{l:"搞笑能力",v:"天赋型"},{l:"真实疲惫",v:"藏得很深"},{l:"被人关心率",v:"偏低"}],
+traits:["暴风雨中第一个说'这体验绝了'的人","别人崩溃时递上一块糖，配一句'没事的'","笑点极低，同伴摔一跤能笑到岔气然后去扶","永远说'我还好'，其实脚已经起泡了","你是全队的情绪稳定器，但谁来稳定你？"],
+warning:"允许自己不开心。幽默是盔甲不是皮肤，你也可以偶尔卸下来让人看到真实的你。",
+goodMatch:{code:"HYP",name:"气氛组",desc:"你们让队伍永远不会无聊"},
+badMatch:{code:"WLF",name:"独狼",desc:"你的热情在TA面前像打在棉花上"}
+},
+ANG:{code:"ANG",name:"小天使",alias:"Angel / 隐形奉献者",icon:"👼",color:"#c084fc",
+desc:"你是团队里的隐形奉献者。你不声不响地帮队友背包、默默给走得慢的人加油、悄悄把营地的垃圾收走。你不求回报，甚至不求感谢。你的快乐来自别人的轻松。你偶尔会被当成冤大头，但你和冤大头最大的区别是——你是自愿的，而且你真的开心。户外圈需要更多你这样的人，但也需要有人来关心你。",
+quote:"没事，我帮你拿",
+stats:[{l:"奉献指数",v:"MAX"},{l:"被感谢率",v:"偏低"},{l:"自身负重",v:"别人的+自己的"},{l:"幸福感",v:"真实的"}],
+traits:["默默把重的食物分给队友，自己啃压缩饼干","走在最后陪最慢的人，从不说'你们先走'","营地收拾永远最后一个走，检查有没有遗漏","别人抱怨时递上热水，自己凉水也行","从不邀功，但每次活动缺了你大家都会发现"],
+warning:"善良需要边界。你的付出应该被看见，而不是被习惯。学会说'这次你来'。",
+goodMatch:{code:"RLB",name:"靠谱王",desc:"你们是户外圈的温暖双人组"},
+badMatch:{code:"DRK",name:"装备党",desc:"你帮TA背装备，TA在研究下一个要买的"}
+},
+ZEN:{code:"ZEN",name:"佛系王",alias:"Zen Master / 情绪天花板",icon:"🧘",color:"#10b981",
+desc:"你是户外圈的情绪天花板。别人吵架你喝茶，别人崩溃你微笑，别人赶路你赏花。你不是懒，你是真的不在乎那些鸡毛蒜皮。你的口头禅是'都行'、'没事'、'挺好的'。你的淡定不是麻木，而是通透——你知道户外最大的意义是开心，不是争对错。你是团队里的减压阀，但有时候你也需要被激活——佛到极致，连自己都忘了为什么出发。",
+quote:"都行，没事，挺好的",
+stats:[{l:"情绪波动",v:"接近0"},{l:"决策速度",v:"也接近0"},{l:"队友安全感",v:"中等偏高"},{l:"存在感",v:"透明但稳定"}],
+traits:["暴风雨来了第一反应是'终于不用赶路了'","队友吵架你坐在旁边吃零食看戏","不争路线、不争床位、不争食物","迷路了也不慌，说'反正也不赶时间'","别人问你意见，你说'你定吧，我都行'"],
+warning:"佛系不等于没有立场。什么都行就是什么都不在意，偶尔也要为自己做选择。",
+goodMatch:{code:"JNX",name:"扫把星",desc:"TA出问题你不慌，绝配"},
+badMatch:{code:"PKR",name:"打卡收割机",desc:"TA嫌你慢，你嫌TA急"}
+}
+};
+
+// ===== 16道测试题 =====
+const questions=[
+{text:"报名一个户外活动后，你一般什么时候开始准备？",
+opts:[
+{t:"提前三天整理装备、检查清单、研究路线，兴奋到失眠",s:{TRK:3,NRD:2}},
+{t:"出发前一晚随便塞两件，心想缺啥现场再说",s:{SLK:3,GVH:1}},
+{t:"反复问领队'要带什么？穿什么？路况如何？'问三遍以上",s:{SNS:3,BSS:1}},
+{t:"研究这周哪款冲锋衣打折，看完装备已花两小时",s:{DRK:3,PHT:1}}
+]},
+{text:"你第一次跟团爬山，发现自己的体力跟不上队伍，你会？",
+opts:[
+{t:"开始教育队友：'你们走太快了，户外要享受过程'",s:{BSS:3,PKR:1}},
+{t:"心想'反正我不急'，自己慢悠悠在后面拍照赏花",s:{ZEN:3,PHT:1}},
+{t:"默默忍着，咬牙跟上，回来在群里吐槽",s:{GVH:3,CHR:1}},
+{t:"主动帮别人背包来掩饰自己的慢，累得半死还赔笑",s:{ANG:3,SNS:1}}
+]},
+{text:"队伍里有人走得特别快，一直催大家，你会？",
+opts:[
+{t:"冷静指出：'这样的配速会拖垮队伍，建议按节奏来'",s:{NRD:3,RLB:1}},
+{t:"假装没听见，继续按自己节奏走，谁催都没用",s:{WLF:3,ZEN:1}},
+{t:"被催急了，开始小跑，然后差点摔一跤",s:{GVH:3,JNX:1}},
+{t:"拉着旁边的人说'别理TA，咱们走自己的'",s:{CHR:3,SNS:1}}
+]},
+{text:"在户外，你迷路了，第一反应是？",
+opts:[
+{t:"掏出离线地图，很快找到方向，顺便安抚大家",s:{NRD:3,RLB:1}},
+{t:"安慰大家'没事没事，走哪算哪'，其实心里也有点虚",s:{ZEN:3,BSS:1}},
+{t:"一个人往前冲去找路，把大部队扔在后面",s:{WLF:3,GVH:1}},
+{t:"打开手机想发群问路，发现没信号，开始慌",s:{SNS:3,JNX:1}}
+]},
+{text:"露营时，你的帐篷搭好了，旁边新来的队友完全不会搭，你会？",
+opts:[
+{t:"过去耐心指导，搭完还帮TA检查地钉拉绳",s:{ANG:3,RLB:1}},
+{t:"大声喊'需要帮忙吗？'然后开始讲自己第一次搭帐篷的糗事",s:{HYP:3,CHR:1}},
+{t:"看一眼，默默把自己帐篷挪过去挡风",s:{WLF:2,ZEN:1}},
+{t:"掏出手机拍TA笨手笨脚的样子，配文'新人的第一天'",s:{PHT:3,SNS:1}}
+]},
+{text:"登山途中突降暴雨，你的反应是？",
+opts:[
+{t:"穿上冲锋衣，检查全队防雨情况，提醒注意失温",s:{RLB:3,NRD:1}},
+{t:"雨中才有氛围感！赶紧拍大片！",s:{PHT:3,BSS:1}},
+{t:"完了完了完了但脚没停过",s:{GVH:3,JNX:1}},
+{t:"'终于不用赶路了'，找个地方坐下等雨停",s:{ZEN:3,SLK:1}}
+]},
+{text:"登顶了！你的第一件事是？",
+opts:[
+{t:"找到最高点站上去，拍照姿势提前排练过",s:{PHT:3,BSS:1}},
+{t:"环顾四周记地形，下撤路线心里已有数",s:{NRD:3,PKR:1}},
+{t:"瘫地上，不想说话，活着真好",s:{GVH:3,SLK:1}},
+{t:"开始计划下一座山，打开手机查附近还有什么峰",s:{TRK:3,PKR:2}}
+]},
+{text:"下山后聚餐，AA结账时你会？",
+opts:[
+{t:"抢着算钱，最后发现自己多付了，不好意思要",s:{ANG:3,RLB:1}},
+{t:"精确计算到每个人吃了多少串，要求按比例付",s:{NRD:3,DRK:1}},
+{t:"主动多付一些，请大家喝水",s:{CHR:3,ANG:1}},
+{t:"'我微信转你'——然后'忘了'三天",s:{SLK:3,SNS:1}}
+]},
+{text:"你的装备购买逻辑是？",
+opts:[
+{t:"性能参数对比三个月，买完写测评",s:{DRK:3,NRD:1}},
+{t:"颜色好看的优先，拍照要出片",s:{PHT:3,SNS:1}},
+{t:"跟着大佬买，大佬买啥我买啥",s:{SNS:3,SLK:1}},
+{t:"什么都多买一份备用，包括备用的备用",s:{RLB:3,DRK:1}}
+]},
+{text:"团队里有个队友脚崴了，需要有人陪TA慢慢下山，你会？",
+opts:[
+{t:"主动留下陪，一路鼓励TA，还帮背了包",s:{ANG:3,CHR:1}},
+{t:"留下陪，但一路上念叨'我怎么这么倒霉'",s:{BSS:3,GVH:1}},
+{t:"说自己膝盖也不好，然后快速溜走",s:{SLK:3,WLF:1}},
+{t:"帮TA简单处理，交代其他人陪，自己先下撤去准备热水",s:{RLB:3,NRD:1}}
+]},
+{text:"露营的夜晚，你在干嘛？",
+opts:[
+{t:"架好三脚架拍星空，顺便给帐篷打光拍氛围照",s:{PHT:3,DRK:1}},
+{t:"围着篝火讲故事，越讲越恐怖，把新人吓到不敢睡",s:{HYP:3,BSS:1}},
+{t:"默默检查营地安全，把容易被风吹走的都加固一遍",s:{RLB:3,NRD:1}},
+{t:"早早钻进睡袋，戴上耳机，享受一个人的安静",s:{WLF:3,ZEN:1}}
+]},
+{text:"户外遇到下雨，你的第一反应是？",
+opts:[
+{t:"穿上冲锋衣，嘲笑没带雨衣的人——等下也借给TA",s:{DRK:3,CHR:1}},
+{t:"躲到树下，然后发朋友圈'雨中即景'",s:{PHT:3,BSS:1}},
+{t:"抱怨'为什么每次都这样？我是不是扫把星'",s:{JNX:3,GVH:1}},
+{t:"'挺好的，凉快'，继续走",s:{ZEN:3,TRK:1}}
+]},
+{text:"领队说'原地休息10分钟'，你会？",
+opts:[
+{t:"立刻坐下，拿出零食开始分享",s:{CHR:3,SNS:1}},
+{t:"说'我不累，继续走吧'，然后自己先走了",s:{TRK:3,WLF:1}},
+{t:"趁机去爬旁边的石头/树，然后差点下不来",s:{HYP:3,JNX:1}},
+{t:"默默检查队友状态，递水递糖，不声不响",s:{ANG:3,RLB:1}}
+]},
+{text:"如果用一句话总结你的户外哲学——",
+opts:[
+{t:"山就在那里，我得一个个去签收",s:{TRK:3,PKR:1}},
+{t:"安全回家才是终点，其他都是过程",s:{NRD:3,RLB:1}},
+{t:"不出片等于没去过",s:{PHT:3,SNS:1}},
+{t:"花钱买罪受，下次还来",s:{GVH:3,CHR:1}}
+]},
+{text:"活动结束后，你通常会？",
+opts:[
+{t:"发一篇小作文加九宫格，每十分钟看一次点赞",s:{PHT:3,BSS:1}},
+{t:"累得半死回家倒头就睡，再也不提",s:{GVH:3,SLK:1}},
+{t:"在群里说'这次不错，下次再约'——第一个报名",s:{SNS:3,TRK:1}},
+{t:"默默整理装备、清洗晾晒、写路线笔记",s:{DRK:3,NRD:1}}
+]},
+{text:"你的队友在山上乱扔垃圾，你会？",
+opts:[
+{t:"当场捡起来，私下跟TA说'下次注意'",s:{ANG:3,RLB:1}},
+{t:"当场大声制止，开始讲环保大道理",s:{HYP:3,BSS:1}},
+{t:"心想'关我屁事'，自己走自己的",s:{WLF:3,SLK:1}},
+{t:"拍下证据，回去发帖'避雷这个人'",s:{SNS:3,PHT:1}}
+]}
+];
+
+let currentQ=0;
+let scores={};
+
+function startQuiz(){
+  document.getElementById('splash').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  currentQ=0;
+  scores={};
+  for(let k in types) scores[k]=0;
+  renderQ();
+}
+
+function renderQ(){
+  const q=questions[currentQ];
+  const fill=(currentQ/questions.length)*100;
+  document.getElementById('progressFill').style.width=fill+'%';
+  document.getElementById('qCounter').textContent=
+    String(currentQ+1).padStart(2,'0')+' / '+String(questions.length).padStart(2,'0');
+  document.getElementById('qText').textContent=q.text;
+  const oc=document.getElementById('options');
+  oc.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='option-btn fade-in';
+    b.style.animationDelay=(i*0.08)+'s';
+    b.textContent=o.t;
+    b.onclick=()=>selOpt(i);
+    oc.appendChild(b);
+  });
+}
+
+function selOpt(i){
+  const q=questions[currentQ];
+  const o=q.opts[i];
+  for(let k in o.s) scores[k]=(scores[k]||0)+o.s[k];
+  const btns=document.querySelectorAll('.option-btn');
+  btns[i].classList.add('selected');
+  btns.forEach(b=>b.style.pointerEvents='none');
+  setTimeout(()=>{
+    currentQ++;
+    if(currentQ<questions.length) renderQ();
+    else showResult();
+  },350);
+}
+
+function showResult(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('result').style.display='block';
+  let maxT='TRK',maxS=0;
+  for(let k in scores){if(scores[k]>maxS){maxS=scores[k];maxT=k;}}
+  const t=types[maxT];
+  let sh='';
+  t.stats.forEach(s=>{sh+=`<div class="stat-item"><div class="stat-value">${s.v}</div><div class="stat-label">${s.l}</div></div>`;});
+  let th='';
+  t.traits.forEach((x,i)=>{th+=`<li><span style="color:var(--accent);margin-right:6px">${i+1}.</span>${x}</li>`;});
+  const gm=types[t.goodMatch.code],bm=types[t.badMatch.code];
+  document.getElementById('result').innerHTML=`
+<div class="result-header fade-in">
+<div class="result-tag">你的户外人格</div>
+<div class="result-type">${t.code}</div>
+<div class="result-name">${t.icon} ${t.name}</div>
+<div class="result-alias">${t.alias}</div>
+</div>
+<div class="result-card fade-in" style="animation-delay:.15s">
+<div class="result-desc">${t.desc}</div>
+<div class="result-quote">${t.quote}</div>
+</div>
+<div class="stats-grid fade-in" style="animation-delay:.25s">${sh}</div>
+<div class="result-card fade-in" style="animation-delay:.35s">
+<div class="section-title">临床诊断</div>
+<ul class="trait-list">${th}</ul>
+</div>
+<div class="warning-box fade-in" style="animation-delay:.45s">⚠️ ${t.warning}</div>
+<div class="result-card fade-in" style="animation-delay:.55s">
+<div class="section-title">组队推荐</div>
+<div class="match-item">
+<div class="match-type" style="color:${gm.color}">${gm.icon} ${gm.code}</div>
+<div class="match-info"><div class="match-name">${gm.name}</div><div class="match-desc">${t.goodMatch.desc}</div></div>
+</div>
+<div class="match-item">
+<div class="match-type" style="color:${bm.color}">${bm.icon} ${bm.code}</div>
+<div class="match-info"><div class="match-name">${bm.name}</div><div class="match-desc">${t.badMatch.desc}</div></div>
+</div>
+</div>
+<div class="result-card fade-in" style="animation-delay:.65s">
+<div class="section-title">全图鉴</div>
+<div class="atlas-grid">
+${Object.values(types).map(x=>`<div class="atlas-item ${x.code===maxT?'atlas-active':''}" style="--c:${x.color}">
+<div class="atlas-avatar"><img src="${avatars[x.code]}" alt="${x.name}"></div>
+<div class="atlas-code">${x.code}</div>
+<div class="atlas-name">${x.name}</div>
+</div>`).join('')}
+</div>
+</div>
+<div class="share-area fade-in" style="animation-delay:.75s">
+<div class="share-title">测完别忘了晒 · 分享你的户外人格</div>
+<button class="share-btn" onclick="copyResult('${t.code}','${t.name}')">复制结果</button>
+<button class="retry-btn" onclick="retryQuiz()">再测一次</button>
+</div>`;
+}
+
+function copyResult(code,name){
+  const txt=`🏔️ OUTI户外人格测试\n我的结果是：${code} - ${name}\n\n零心理学依据，零登山指导意义\n纯粹测测你在山野里的精神状态\n16种人格，总有一款扎你心\n\n👉 来测测你的户外人格`;
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(showToast);}
+  else{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast();}
+}
+function showToast(){
+  const d=document.createElement('div');
+  d.textContent='已复制到剪贴板！';
+  d.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(74,222,128,.9);color:#000;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:700;z-index:9999';
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2000);
+}
+function retryQuiz(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('splash').style.display='flex';
+  currentQ=0;scores={};
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('quiz').style.display==='block'){
+    const n=parseInt(e.key);
+    if(n>=1&&n<=4){const b=document.querySelectorAll('.option-btn');if(b[n-1])b[n-1].click();}
+  }
+});
+</script>
+</body>
+</html>
