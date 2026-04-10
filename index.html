@@ -115,24 +115,24 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 // ===== 16个户外人格形象图片 =====
-const avatarPath='outi形象图片/';
+const avatarPath='avatars/';
 const avatars={
-TRK:avatarPath+'1. TRK.png',
-NRD:avatarPath+'2. NRD.png',
-PHT:avatarPath+'3. PHT .png',
-SNS:avatarPath+'4. SNS.png',
-GVH:avatarPath+'5. GVH.png',
-PKR:avatarPath+'6. PKR.png',
-DRK:avatarPath+'7. DRK .png',
-BSS:avatarPath+'8. BSS.png',
-WLF:avatarPath+'9. WLF.png',
-SLK:avatarPath+'10. SLK.png',
-HYP:avatarPath+'11. HYP.png',
-JNX:avatarPath+'12. JNX.png',
-RLB:avatarPath+'13. RLB.png',
-CHR:avatarPath+'14. CHR.png',
-ANG:avatarPath+'15. ANG.png',
-ZEN:avatarPath+'16. ZEN.png'
+TRK:avatarPath+'1. TRK.jpg',
+NRD:avatarPath+'2. NRD.jpg',
+PHT:avatarPath+'3. PHT .jpg',
+SNS:avatarPath+'4. SNS.jpg',
+GVH:avatarPath+'5. GVH.jpg',
+PKR:avatarPath+'6. PKR.jpg',
+DRK:avatarPath+'7. DRK .jpg',
+BSS:avatarPath+'8. BSS.jpg',
+WLF:avatarPath+'9. WLF.jpg',
+SLK:avatarPath+'10. SLK.jpg',
+HYP:avatarPath+'11. HYP.jpg',
+JNX:avatarPath+'12. JNX.jpg',
+RLB:avatarPath+'13. RLB.jpg',
+CHR:avatarPath+'14. CHR.jpg',
+ANG:avatarPath+'15. ANG.jpg',
+ZEN:avatarPath+'16. ZEN.jpg'
 };
 
 ;
@@ -503,7 +503,7 @@ ${Object.values(types).map(x=>`<div class="atlas-item ${x.code===maxT?'atlas-act
 }
 
 function copyResult(code,name){
-  const txt=`🏔️ OUTI户外人格测试\n我的结果是：${code} - ${name}\n\n零心理学依据，零登山指导意义\n纯粹测测你在山野里的精神状态\n16种人格，总有一款扎你心\n\n👉 来测你的户外人格：https://outijustforfun.zh-cn.edgeone.cool`;
+  const txt=`🏔️ OUTI户外人格测试\n我的结果是：${code} - ${name}\n\n零心理学依据，零登山指导意义\n纯粹测测你在山野里的精神状态\n16种人格，总有一款扎你心\n\n👉 来测你的户外人格：https://pod-ojaa.upma.site`;
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(showToast);}
   else{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast();}
 }
