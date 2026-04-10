@@ -503,7 +503,7 @@ ${Object.values(types).map(x=>`<div class="atlas-item ${x.code===maxT?'atlas-act
 }
 
 function copyResult(code,name){
-  const txt=`🏔️ OUTI户外人格测试\n我的结果是：${code} - ${name}\n\n零心理学依据，零登山指导意义\n纯粹测测你在山野里的精神状态\n16种人格，总有一款扎你心\n\n👉 来测测你的户外人格`;
+  const txt=`🏔️ OUTI户外人格测试\n我的结果是：${code} - ${name}\n\n零心理学依据，零登山指导意义\n纯粹测测你在山野里的精神状态\n16种人格，总有一款扎你心\n\n👉 来测你的户外人格：https://outi.vercel.app`;
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(showToast);}
   else{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast();}
 }
